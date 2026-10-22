@@ -18,11 +18,39 @@ AMITRANET_APP_URL = "https://play.google.com/store/apps/details?id=com.amizone.a
 st.markdown(
     """
     <style>
-      .block-container {max-width: 850px; padding-top: 1.8rem; padding-bottom: 2.5rem;}
-      .hero {padding: 1.25rem 1.35rem; border-radius: 18px; border: 1px solid rgba(128,128,128,.25); margin-bottom: 1rem;}
-      .hero h1 {margin: 0 0 .3rem 0; font-size: 1.8rem;}
-      .hero p {margin: 0; opacity: .82;}
-      .small-note {font-size: .85rem; opacity: .8;}
+      :root { --amity-navy: #12315a; --amity-blue: #1d5fa7; --amity-teal: #21a6a1; }
+      .block-container {max-width: 980px; padding-top: 1.4rem; padding-bottom: 2.5rem;}
+      [data-testid="stSidebar"] {border-right: 1px solid rgba(100,116,139,.18);}
+      .hero {
+        position: relative; overflow: hidden; padding: 1.8rem 1.8rem 1.65rem;
+        border-radius: 24px; margin: .35rem 0 1.2rem;
+        color: white; background: linear-gradient(120deg, #102c50 0%, #185a91 62%, #178f98 100%);
+        box-shadow: 0 14px 35px rgba(18,49,90,.16);
+      }
+      .hero:after {content:""; position:absolute; width:220px; height:220px; right:-55px; top:-95px;
+        border: 28px solid rgba(255,255,255,.10); border-radius:50%; pointer-events:none;}
+      .hero:before {content:""; position:absolute; width:100px; height:100px; right:110px; bottom:-65px;
+        background:rgba(255,255,255,.08); border-radius:28px; transform:rotate(35deg); pointer-events:none;}
+      .hero .eyebrow {font-size:.75rem; letter-spacing:.13em; text-transform:uppercase; font-weight:700; opacity:.8; margin-bottom:.5rem;}
+      .hero h1 {margin:0 0 .4rem; font-size:2rem; line-height:1.15; color:white;}
+      .hero p {margin:0; max-width:620px; color:rgba(255,255,255,.86); font-size:1rem;}
+      .hero .hero-mark {font-size:2.2rem; margin-bottom:.35rem;}
+      .section-heading {font-size:1.05rem; font-weight:700; margin:.25rem 0 .25rem;}
+      .section-sub {font-size:.88rem; opacity:.72; margin:0 0 .75rem;}
+      .info-card {border:1px solid rgba(100,116,139,.20); border-radius:16px; padding:1rem 1.05rem;
+        background:linear-gradient(145deg, rgba(255,255,255,.92), rgba(239,246,255,.75)); min-height:108px;}
+      @media (prefers-color-scheme: dark) {
+        .info-card {background:linear-gradient(145deg, rgba(30,41,59,.8), rgba(15,45,70,.65));}
+      }
+      .info-icon {font-size:1.35rem; margin-bottom:.35rem;}
+      .info-label {font-size:.76rem; text-transform:uppercase; letter-spacing:.06em; opacity:.68; font-weight:700;}
+      .info-value {font-size:1rem; font-weight:700; margin-top:.2rem;}
+      .small-note {font-size:.82rem; opacity:.72; line-height:1.55;}
+      div[data-testid="stChatMessage"] {border-radius:16px; padding:.25rem .45rem;}
+      div[data-testid="stExpander"] {border-radius:16px; border-color:rgba(100,116,139,.22);}
+      div.stButton > button, div.stLinkButton > a {border-radius:11px; font-weight:600;}
+      div[data-testid="stChatInput"] {border-radius:16px;}
+      .footer-line {text-align:center; opacity:.58; font-size:.78rem; padding:.5rem 0 .2rem;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -32,10 +60,28 @@ language = st.radio("Language", ["English", "हिन्दी"], horizontal=Tr
 lang = "en" if language == "English" else "hi"
 
 st.markdown(
-    f'<div class="hero"><h1>🏫 {"School Help Desk" if lang == "en" else "स्कूल सहायता केंद्र"}</h1>'
-    f'<p>{SCHOOL_NAME} · {"Student and parent information demo" if lang == "en" else "विद्यार्थियों और अभिभावकों के लिए जानकारी डेमो"}</p></div>',
+    f'<div class="hero"><div class="hero-mark">🏫</div>'
+    f'<div class="eyebrow">{"AMITY INTERNATIONAL SCHOOL · MAYUR VIHAR" if lang == "en" else "एमिटी इंटरनेशनल स्कूल · मयूर विहार"}</div>'
+    f'<h1>{"School Help Desk" if lang == "en" else "स्कूल सहायता केंद्र"}</h1>'
+    f'<p>{"A simple place to find school information, useful links and contact details." if lang == "en" else "स्कूल की जानकारी, उपयोगी लिंक और संपर्क विवरण पाने का आसान माध्यम।"}</p></div>',
     unsafe_allow_html=True,
 )
+
+# At-a-glance cards add a little visual structure without distracting from the chat.
+card_cols = st.columns(3)
+card_data = (
+    [("🕘", "SCHOOL HOURS", "7:50 AM – 1:50 PM"), ("☎️", "RECEPTION", RECEPTION_PHONE), ("🌐", "ONLINE ACCESS", "Amitranet portal")]
+    if lang == "en" else
+    [("🕘", "स्कूल का समय", "सुबह 7:50 – दोपहर 1:50"), ("☎️", "रिसेप्शन", RECEPTION_PHONE), ("🌐", "ऑनलाइन सुविधा", "Amitranet पोर्टल")]
+)
+for card_col, (card_icon, card_label, card_value) in zip(card_cols, card_data):
+    with card_col:
+        st.markdown(
+            f'<div class="info-card"><div class="info-icon">{card_icon}</div>'
+            f'<div class="info-label">{card_label}</div><div class="info-value">{card_value}</div></div>',
+            unsafe_allow_html=True,
+        )
+st.write("")
 
 with st.sidebar:
     st.subheader("School links" if lang == "en" else "स्कूल लिंक")
@@ -176,7 +222,11 @@ if "messages" not in st.session_state:
 if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 
-st.markdown("**Ask a question**" if lang == "en" else "**अपना सवाल पूछें**")
+st.markdown(
+    f'<div class="section-heading">{"💬 Ask the Help Desk" if lang == "en" else "💬 सहायता केंद्र से पूछें"}</div>'
+    f'<div class="section-sub">{"Choose a common topic or type your question below." if lang == "en" else "कोई सामान्य विषय चुनें या नीचे अपना सवाल लिखें।"}</div>',
+    unsafe_allow_html=True,
+)
 with st.expander("Quick questions" if lang == "en" else "जल्दी पूछें", expanded=True):
     cols = st.columns(2)
     for i, prompt in enumerate(QUICK_PROMPTS[lang]):
@@ -217,4 +267,4 @@ footer_note = (
     "परीक्षा की तारीखों और स्कूल की प्रक्रियाओं की पुष्टि स्कूल से करें। "
     "पासवर्ड, विद्यार्थी आईडी, भुगतान विवरण या अन्य निजी जानकारी न डालें।"
 )
-st.markdown(f'<p class="small-note">{footer_note}</p>', unsafe_allow_html=True)
+st.markdown(f'<p class="small-note">{footer_note}</p><div class="footer-line">✦ {"Designed for easier school information access" if lang == "en" else "स्कूल की जानकारी आसानी से पाने के लिए बनाया गया"} ✦</div>', unsafe_allow_html=True)
