@@ -1,3 +1,35 @@
+import streamlit as st
+
+st.set_page_config(page_title="School Help Desk", page_icon="🏫", layout="centered")
+
+AMITRANET_URL = "https://amitranet.amizone.net"
+
+FAQS = {
+    "en": {
+        "id": (
+            "If your school ID card has been lost, please contact the school reception for guidance on the replacement procedure.",
+            ["id card", "lost id", "identity card"],
+        ),
+        "fees": (
+            "For fee-related enquiries, please contact the school's Accounts Section. Please confirm the current payment procedure with the school.",
+            ["fee", "fees", "payment", "accounts"],
+        ),
+        "bus": (
+            f"For the latest bus route and stop information, please sign in to the official Amitranet website using your school-provided credentials: [{AMITRANET_URL}]({AMITRANET_URL}). If the required information is unavailable, please contact the school reception at **011-22717261** for assistance.",
+            ["bus", "route", "transport", "stop", "school bus"],
+        ),
+        "teacher": (
+            "For teacher-related enquiries, please contact the school to confirm the appropriate communication procedure or to arrange an appointment.",
+            ["teacher", "meet teacher", "email teacher", "contact teacher"],
+        ),
+        "datesheet": (
+            "**Class XII Pre-Board Examination Datesheet**\n\n"
+            "The following schedule is based on the latest dates you provided. Please check the school's official notices for any revisions.\n\n"
+            "| Date | Subject |\n|---|---|\n"
+            "| 26 October 2026 | Sixth Subject |\n"
+            "| 2 November 2026 | Physics |\n"
+            "| 13 November 2026 | English |\n"
+            "| 18 November 2026 | Chemistry |\n"
             "| 30 November 2026 | Mathematics |\n\n"
             "*Note: The sixth subject depends on the student's subject combination.*",
             ["datesheet", "date sheet", "exam date", "examination", "planner", "exam", "unit test", "preboard", "pre-board", "pre board", "paper date"],
