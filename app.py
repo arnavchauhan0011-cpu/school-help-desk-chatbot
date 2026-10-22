@@ -28,26 +28,26 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+language = st.radio("Language", ["English", "हिन्दी"], horizontal=True, key="ui_language")
+lang = "en" if language == "English" else "hi"
+
 st.markdown(
-    f'<div class="hero"><h1>🏫 School Help Desk</h1>'
-    f'<p>{SCHOOL_NAME} · Student and parent information demo</p></div>',
+    f'<div class="hero"><h1>🏫 {"School Help Desk" if lang == "en" else "स्कूल सहायता केंद्र"}</h1>'
+    f'<p>{SCHOOL_NAME} · {"Student and parent information demo" if lang == "en" else "विद्यार्थियों और अभिभावकों के लिए जानकारी डेमो"}</p></div>',
     unsafe_allow_html=True,
 )
 
 with st.sidebar:
-    st.subheader("School links / स्कूल लिंक")
-    st.link_button("Official school website", SCHOOL_WEBSITE, use_container_width=True)
-    st.link_button("Amitranet portal", AMITRANET_URL, use_container_width=True)
-    st.link_button("Amitranet Android app", AMITRANET_APP_URL, use_container_width=True)
-    st.markdown("### Reception / रिसेप्शन")
+    st.subheader("School links" if lang == "en" else "स्कूल लिंक")
+    st.link_button("Official school website" if lang == "en" else "स्कूल की आधिकारिक वेबसाइट", SCHOOL_WEBSITE, use_container_width=True)
+    st.link_button("Amitranet portal" if lang == "en" else "Amitranet पोर्टल", AMITRANET_URL, use_container_width=True)
+    st.link_button("Amitranet Android app" if lang == "en" else "Amitranet Android ऐप", AMITRANET_APP_URL, use_container_width=True)
+    st.markdown("### Reception" if lang == "en" else "### रिसेप्शन")
     st.write(f"**{RECEPTION_PHONE}**")
-    st.link_button("📞 Call reception", f"tel:{RECEPTION_PHONE}", use_container_width=True)
-    st.caption("For urgent or account-specific questions, contact the school directly.")
+    st.link_button("📞 Call reception" if lang == "en" else "📞 रिसेप्शन पर कॉल करें", f"tel:{RECEPTION_PHONE}", use_container_width=True)
+    st.caption("For urgent or account-specific questions, contact the school directly." if lang == "en" else "ज़रूरी या व्यक्तिगत जानकारी के लिए सीधे स्कूल से संपर्क करें।")
     st.divider()
-    st.caption("Demo project · Please verify information against current school circulars.")
-
-language = st.radio("Language / भाषा", ["English", "हिन्दी"], horizontal=True)
-lang = "en" if language == "English" else "hi"
+    st.caption("Demo project · Verify information against current school circulars." if lang == "en" else "डेमो प्रोजेक्ट · जानकारी की पुष्टि नवीनतम स्कूल सर्कुलर से करें।")
 
 FAQS = {
     "en": {
@@ -74,12 +74,11 @@ FAQS = {
         "datesheet": (
             "**Class XII Pre-Board dates shared for this demo**\n\n"
             "| Date | Subject |\n|---|---|\n"
-            "| 26 October 2026 | Sixth Subject* |\n"
+            "| 26 October 2026 | Sixth Subject |\n"
             "| 2 November 2026 | Physics |\n"
             "| 13 November 2026 | English |\n"
             "| 18 November 2026 | Chemistry |\n"
-            "| 30 November 2026 | Mathematics |\n\n"
-            "*This schedule was transcribed from information previously shared for the project; it is **not live-verified**. Check the latest official school circular or teacher message before relying on any date. The sixth subject depends on your subject combination.*",
+            "| 30 November 2026 | Mathematics |",
             ["datesheet", "date sheet", "exam date", "examination", "planner", "exam", "unit test", "preboard", "pre-board", "pre board", "paper date", "test date"],
         ),
         "timing": (
@@ -123,12 +122,11 @@ FAQS = {
         "datesheet": (
             "**कक्षा XII की प्री-बोर्ड डेटशीट — इस डेमो के लिए साझा जानकारी**\n\n"
             "| तारीख | विषय |\n|---|---|\n"
-            "| 26 अक्टूबर 2026 | छठा विषय* |\n"
+            "| 26 अक्टूबर 2026 | छठा विषय |\n"
             "| 2 नवंबर 2026 | भौतिक विज्ञान (Physics) |\n"
             "| 13 नवंबर 2026 | अंग्रेज़ी (English) |\n"
             "| 18 नवंबर 2026 | रसायन विज्ञान (Chemistry) |\n"
-            "| 30 नवंबर 2026 | गणित (Mathematics) |\n\n"
-            "*यह सूची पहले साझा की गई जानकारी से टाइप की गई है; इसे लाइव सत्यापित नहीं किया गया है। किसी तारीख पर भरोसा करने से पहले नवीनतम आधिकारिक सर्कुलर या शिक्षक के संदेश से पुष्टि करें। छठा विषय विद्यार्थी के विषय संयोजन पर निर्भर है।",
+            "| 30 नवंबर 2026 | गणित (Mathematics) |",
             ["डेटशीट", "तारीख", "परीक्षा", "प्लानर", "datesheet", "exam", "unit test", "preboard", "pre-board", "प्री-बोर्ड", "प्री बोर्ड", "पेपर की तारीख"],
         ),
         "timing": (
@@ -178,8 +176,8 @@ if "messages" not in st.session_state:
 if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 
-st.markdown("**Ask a question / अपना सवाल पूछें**")
-with st.expander("Quick questions / जल्दी पूछें", expanded=True):
+st.markdown("**Ask a question**" if lang == "en" else "**अपना सवाल पूछें**")
+with st.expander("Quick questions" if lang == "en" else "जल्दी पूछें", expanded=True):
     cols = st.columns(2)
     for i, prompt in enumerate(QUICK_PROMPTS[lang]):
         if cols[i % 2].button(prompt, use_container_width=True, key=f"quick_{lang}_{i}"):
@@ -203,16 +201,20 @@ if question:
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("Clear chat / चैट साफ़ करें", use_container_width=True):
+    if st.button("Clear chat" if lang == "en" else "चैट साफ़ करें", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 with col2:
-    st.link_button("Open school website", SCHOOL_WEBSITE, use_container_width=True)
+    st.link_button("Open school website" if lang == "en" else "स्कूल की वेबसाइट खोलें", SCHOOL_WEBSITE, use_container_width=True)
 
 st.divider()
-st.markdown(
-    '<p class="small-note">Student project demo. FAQ answers are predefined, not generated by an AI model. '
-    'Exam dates and school procedures are not live-verified. Confirm important information with the school. '
-    'Do not enter passwords, student IDs, payment details, or other sensitive information.</p>',
-    unsafe_allow_html=True,
+footer_note = (
+    "Student project demo. FAQ answers are predefined, not generated by an AI model. "
+    "Exam dates and school procedures may not be current. Confirm important information with the school. "
+    "Do not enter passwords, student IDs, payment details, or other sensitive information."
+    if lang == "en" else
+    "विद्यार्थी प्रोजेक्ट डेमो। जवाब पहले से तय हैं, AI द्वारा तैयार नहीं किए जाते। "
+    "परीक्षा की तारीखों और स्कूल की प्रक्रियाओं की पुष्टि स्कूल से करें। "
+    "पासवर्ड, विद्यार्थी आईडी, भुगतान विवरण या अन्य निजी जानकारी न डालें।"
 )
+st.markdown(f'<p class="small-note">{footer_note}</p>', unsafe_allow_html=True)
