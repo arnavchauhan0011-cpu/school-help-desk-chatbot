@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime, timedelta, timezone
 
 import streamlit as st
@@ -218,6 +219,13 @@ QUICK_PROMPTS = {
 def answer_question(question: str, selected_lang: str) -> str:
     """Return a predefined FAQ answer using simple keyword matching."""
     q = question.casefold().strip()
+    greetings = ("hello", "hi", "hey", "namaste", "good morning", "good afternoon", "नमस्ते", "हेलो", "हाय")
+    if q.strip("!., ") in greetings:
+        return (
+            f"Hello! I'm the {SCHOOL_NAME} help desk. Ask me about timings, fees, bus, exams or contacts."
+            if selected_lang == "en"
+            else "नमस्ते! मैं स्कूल सहायता केंद्र हूँ। समय, फीस, बस, परीक्षा या संपर्क के बारे में पूछें।"
+        )
     # More specific topics are checked before general contact and website topics.
     priority = ("datesheet", "bus", "fees", "id", "leave", "homework", "teacher", "timing", "contact", "website")
     for key in priority:
@@ -249,7 +257,18 @@ def get_secret(name: str, default=None):
         return default
 
 
-GEMINI_MODEL = get_secret("GEMINI_MODEL", "gemini-3.5-flash")
+# Models are tried in order. If one hits its limit or is unavailable, the next is used.
+# Set GEMINI_MODELS in secrets as a comma-separated list to change this.
+DEFAULT_MODELS = "gemini-2.5-flash-lite, gemini-2.5-flash, gemini-3.5-flash"
+_models_setting = get_secret("GEMINI_MODELS") or get_secret("GEMINI_MODEL") or DEFAULT_MODELS
+GEMINI_MODELS = [m.strip() for m in str(_models_setting).split(",") if m.strip()]
+COOLDOWN_SECONDS = 300  # skip a model for 5 minutes after it fails
+
+
+@st.cache_resource
+def model_cooldowns() -> dict:
+    """Shared across all visitors: model name -> time until we retry it."""
+    return {}
 
 # Built from the English FAQ so there is one source of truth for school facts.
 KNOWLEDGE_BASE = "\n\n".join(
@@ -317,19 +336,37 @@ def ask_gemini(question: str, history: list, selected_lang: str):
         types.Content(role="user", parts=[types.Part.from_text(text=question[:MAX_INPUT_CHARS])])
     )
 
-    try:
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=build_system_instruction(selected_lang),
-                temperature=0.2,
-                max_output_tokens=1500,
-            ),
-        )
-        return (response.text or "").strip() or None
-    except Exception:
-        return None
+    config = types.GenerateContentConfig(
+        system_instruction=build_system_instruction(selected_lang),
+        temperature=0.2,
+        max_output_tokens=1500,
+    )
+
+    cooldowns = model_cooldowns()
+    now = time.time()
+    # Skip models that failed recently, unless every model is cooling down.
+    candidates = [m for m in GEMINI_MODELS if cooldowns.get(m, 0) <= now] or GEMINI_MODELS
+
+    errors = []
+    for model in candidates:
+        try:
+            response = client.models.generate_content(model=model, contents=contents, config=config)
+            text = (response.text or "").strip()
+            if not text:
+                raise ValueError("empty reply")
+            cooldowns.pop(model, None)
+            st.session_state["gemini_model_used"] = model
+            if errors:
+                st.session_state["gemini_error"] = " | ".join(errors)  # earlier models failed
+            else:
+                st.session_state.pop("gemini_error", None)
+            return text
+        except Exception as e:
+            cooldowns[model] = time.time() + COOLDOWN_SECONDS
+            errors.append(f"{model}: {type(e).__name__}: {str(e)[:150]}")
+
+    st.session_state["gemini_error"] = " | ".join(errors)
+    return None
 
 
 if "messages" not in st.session_state:
@@ -339,7 +376,11 @@ if "pending_question" not in st.session_state:
 
 with st.sidebar:
     if get_gemini_client() is not None:
-        st.caption("✨ Gemini AI is on" if lang == "en" else "✨ Gemini AI चालू है")
+        st.caption("✨ Gemini key found" if lang == "en" else "✨ Gemini key मिल गई")
+        if st.session_state.get("gemini_model_used"):
+            st.caption("Model: " + st.session_state["gemini_model_used"])
+        if st.session_state.get("gemini_error"):
+            st.warning("Gemini problem: " + st.session_state["gemini_error"])
     else:
         st.caption("Gemini is not configured. Using the keyword FAQ." if lang == "en" else "Gemini सेट नहीं है। कीवर्ड FAQ उपयोग हो रहा है।")
 
