@@ -259,7 +259,7 @@ def get_secret(name: str, default=None):
 
 # Models are tried in order. If one hits its limit or is unavailable, the next is used.
 # Set GEMINI_MODELS in secrets as a comma-separated list to change this.
-DEFAULT_MODELS = "gemini-2.5-flash-lite, gemini-2.5-flash, gemini-3.5-flash"
+DEFAULT_MODELS = "gemini-3.5-flash, gemini-3.5-flash-lite, gemini-3.1-flash-lite"
 _models_setting = get_secret("GEMINI_MODELS") or get_secret("GEMINI_MODEL") or DEFAULT_MODELS
 GEMINI_MODELS = [m.strip() for m in str(_models_setting).split(",") if m.strip()]
 COOLDOWN_SECONDS = 300  # skip a model for 5 minutes after it fails
@@ -381,6 +381,17 @@ with st.sidebar:
             st.caption("Model: " + st.session_state["gemini_model_used"])
         if st.session_state.get("gemini_error"):
             st.warning("Gemini problem: " + st.session_state["gemini_error"])
+        with st.expander("Which models can my key use?"):
+            if st.button("List available models", key="list_models"):
+                try:
+                    names = []
+                    for m in get_gemini_client().models.list():
+                        actions = getattr(m, "supported_actions", None) or []
+                        if "generateContent" in actions and "flash" in m.name:
+                            names.append(m.name.replace("models/", ""))
+                    st.code("\n".join(sorted(names)) or "No Flash models found")
+                except Exception as e:
+                    st.error(f"{type(e).__name__}: {str(e)[:200]}")
     else:
         st.caption("Gemini is not configured. Using the keyword FAQ." if lang == "en" else "Gemini सेट नहीं है। कीवर्ड FAQ उपयोग हो रहा है।")
 
